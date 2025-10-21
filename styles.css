@@ -1,0 +1,169 @@
+/* Custom Styles for IT Assessment Portal */
+
+/* Step Progress Bar */
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 0 auto 8px;
+}
+
+.step-text {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+}
+
+.step-line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #e5e7eb;
+    margin: 0 8px;
+}
+
+.step.active .step-circle {
+    background-color: #007BFF;
+    color: white;
+}
+
+.step.active .step-text {
+    color: #007BFF;
+    font-weight: 500;
+}
+
+.step.completed .step-circle {
+    background-color: #10B981;
+    color: white;
+}
+
+.step.completed .step-text {
+    color: #10B981;
+    font-weight: 500;
+}
+
+.step.completed + .step-line {
+    background-color: #10B981;
+}
+
+/* Form Styles */
+.step-form {
+    transition: all 0.3s ease;
+}
+
+.step-form.hidden {
+    display: none;
+}
+
+.step-form.active {
+    display: block;
+}
+
+/* Radio and Checkbox Styles */
+.form-radio {
+    width: 1rem;
+    height: 1rem;
+    color: #007BFF;
+    border-color: #D1D5DB;
+}
+
+/* Button Hover Effects */
+button {
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+/* File Input Styling */
+input[type="file"] {
+    padding: 8px;
+    background-color: #f9fafb;
+}
+
+/* Summary Section Styling */
+.summary-item {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.summary-label {
+    font-weight: 500;
+    width: 40%;
+    color: #4B5563;
+}
+
+.summary-value {
+    width: 60%;
+}
+
+/* Success Message Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#success-message {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    .step-text {
+        font-size: 12px;
+    }
+    
+    .step-circle {
+        width: 32px;
+        height: 32px;
+    }
+}
+/* Computer Form Factor dropdown sizing */
+#computerFormFactor {
+  font-size: 14px;
+  line-height: normal;
+}
+
+#computerFormFactor option {
+  font-size: 14px;
+  line-height: normal;
+  color: #111827; /* black for real options */
+}
+
+/* Operating System dropdown sizing */
+#operatingSystem {
+  font-size: 14px;
+  line-height: normal;
+}
+
+#operatingSystem option {
+  font-size: 14px;
+  line-height: normal;
+  color: #111827; /* black for real options */
+}
+
+/* Keep disabled placeholder option gray inside the dropdown list */
+#computerFormFactor option:disabled,
+#operatingSystem option:disabled {
+  color: #9ca3af;
+}
+
+/* Ensure input and textarea placeholders use compact size and gray color */
+input::placeholder,
+textarea::placeholder {
+  font-size: 14px;
+  line-height: normal;
+  color: #9ca3af; /* Tailwind gray-400 equivalent */
+  opacity: 1; /* consistent across browsers */
+}
+
+/* When a select is currently showing its placeholder option, gray the text */
+select.placeholder-selected {
+  color: #9ca3af;
+}
