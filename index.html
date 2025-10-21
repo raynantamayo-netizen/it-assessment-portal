@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extenteam IT Assessment Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007BFF',
+                        background: '#f7f8fa',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-background font-poppins">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-3xl mx-auto py-4 flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-[#004aad]">IT Assessment</h1>
+                <a href="https://www.extenteam.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit Extenteam website">
+                    <img src="Extenteam Logo.png" alt="Extenteam Logo" class="h-20 w-auto object-contain" />
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
+                <!-- Step Progress Bar -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center">
+                        <div id="step1" class="step active" data-step="1">
+                            <div class="step-circle">1</div>
+                            <div class="step-text">Personal Info</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div id="step2" class="step" data-step="2">
+                            <div class="step-circle">2</div>
+                            <div class="step-text">Hardware</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div id="step3" class="step" data-step="3">
+                            <div class="step-circle">3</div>
+                            <div class="step-text">Internet</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div id="step4" class="step" data-step="4">
+                            <div class="step-circle">4</div>
+                            <div class="step-text">Summary</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Container -->
+                <div id="form-container">
+                    <!-- Step 1: Personal Information -->
+                    <div id="personal-info-form" class="step-form active">
+                        <h2 class="text-2xl font-semibold mb-2">Personal Information</h2>
+                        <p class="text-gray-600 mb-6">Please provide your basic information to begin the assessment.</p>
+                        
+                        <div class="mb-4">
+                            <label for="fullName" class="block text-gray-700 font-medium mb-2">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="email" class="block text-gray-700 font-medium mb-2">Personal Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="your.email@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="assessmentDate" class="block text-gray-700 font-medium mb-2">Assessment Date</label>
+                            <input type="date" id="assessmentDate" name="assessmentDate" placeholder="YYYY-MM-DD" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button type="button" class="next-step bg-primary text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center">
+                                Continue to Hardware Assessment
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Hardware Assessment -->
+                    <div id="hardware-form" class="step-form hidden">
+                        <div class="bg-blue-100 border-l-4 border-primary p-4 mb-6">
+                            <p class="text-blue-700">Great! Let's start with your hardware assessment.</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Does your computer have existing hardware issues?</label>
+                            <div class="mt-2">
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" name="hardwareIssues" value="yes" class="form-radio text-primary">
+                                    <span class="ml-2">Yes, I have hardware issues</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="hardwareIssues" value="no" class="form-radio text-primary">
+                                    <span class="ml-2">No hardware issue</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="hardwareIssuesDescription" class="mb-4 hidden">
+                            <label for="issuesDescription" class="block text-gray-700 font-medium mb-2">Describe the issue/s</label>
+                            <textarea id="issuesDescription" name="issuesDescription" rows="3" placeholder="If yes, please describe the issues" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="computerFormFactor" class="block text-gray-700 font-medium mb-2">Computer Form Factor</label>
+                            <select id="computerFormFactor" name="computerFormFactor" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm" required>
+                                <option value="" disabled selected>Select form factor</option>
+                                <option value="Laptop">Laptop</option>
+                                <option value="Desktop">Desktop</option>
+                                <option value="All-in-one">All-in-one</option>
+                                <option value="Workstation">Workstation</option>
+                                <option value="Mini-PC">Mini-PC</option>
+                                <option value="Tablet">Tablet</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="operatingSystem" class="block text-gray-700 font-medium mb-2">Operating System</label>
+                            <select id="operatingSystem" name="operatingSystem" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm" required>
+                                <option value="" disabled selected>Select your operating system</option>
+                                <option value="Windows 11">Windows 11</option>
+                                <option value="Windows 10">Windows 10</option>
+                                <option value="macOS">macOS</option>
+                                <option value="Linux">Linux</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="processor" class="block text-gray-700 font-medium mb-2">Processor</label>
+                            <input type="text" id="processor" name="processor" placeholder="e.g., Intel Core i5-11400, Apple M1" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                            
+                            <div class="mt-2 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                <p class="text-sm text-yellow-700">
+                                    <span class="font-bold">💡 How to find your processor specifications:</span><br>
+                                    <strong>Windows:</strong> File Explorer → Right-click This PC → Properties → View processor info under System<br>
+                                    <strong>Mac:</strong> Apple menu → About This Mac → View processor details<br>
+                                    <strong>Alternative:</strong> Press Ctrl+Shift+Esc (Windows) → Performance → CPU
+                                </p>
+                                <div class="mt-3">
+                                    <video controls class="w-full rounded-md border border-yellow-200">
+                                        <source src="Windows Specification Check.mp4" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="processorScreenshot" class="block text-gray-700 font-medium mb-2">Upload a full-screen screenshot showing processor info</label>
+                            <input type="file" id="processorScreenshot" name="processorScreenshot" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="ramMemory" class="block text-gray-700 font-medium mb-2">RAM Memory</label>
+                            <input type="text" id="ramMemory" name="ramMemory" placeholder="e.g., 16 GB" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Do you have a backup device?</label>
+                            <div class="mt-2">
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" name="backupDevice" value="yes" class="form-radio text-primary">
+                                    <span class="ml-2">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="backupDevice" value="no" class="form-radio text-primary">
+                                    <span class="ml-2">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Do you have a backup power source?</label>
+                            <div class="mt-2">
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" name="backupPower" value="yes" class="form-radio text-primary">
+                                    <span class="ml-2">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="backupPower" value="no" class="form-radio text-primary">
+                                    <span class="ml-2">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="backupPowerDescription" class="mb-4 hidden">
+                            <label for="powerDescription" class="block text-gray-700 font-medium mb-2">Such as UPS, power bank, generator set, or power station</label>
+                            <input type="text" id="powerDescription" name="powerDescription" placeholder="Describe your backup power (e.g., UPS, generator)" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-medium mb-2">Do you have a second monitor?</label>
+                            <div class="mt-2">
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" name="secondMonitor" value="yes" class="form-radio text-primary">
+                                    <span class="ml-2">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="secondMonitor" value="no" class="form-radio text-primary">
+                                    <span class="ml-2">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button type="button" class="prev-step bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                </svg>
+                                Back
+                            </button>
+                            <button type="button" class="next-step bg-primary text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center">
+                                Continue to Internet Assessment
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Internet Assessment -->
+                    <div id="internet-form" class="step-form hidden">
+                        <div class="bg-blue-100 border-l-4 border-primary p-4 mb-6">
+                            <p class="text-blue-700">Great! Let's now check your internet connectivity setup.</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="internetProvider" class="block text-gray-700 font-medium mb-2">Main Internet Service Provider</label>
+                            <input type="text" id="internetProvider" name="internetProvider" placeholder="Enter your ISP (e.g., PLDT, Globe, Comcast)" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="internetSpeed" class="block text-gray-700 font-medium mb-0">Internet Speed Test Result</label>
+                            <p class="text-sm text-gray-500 italic mb-2">Ex. 100 Mbps / 90 Mbps</p>
+                            <input type="text" id="internetSpeed" name="internetSpeed" placeholder="Enter download and upload speed in Mbps" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                            <div class="mt-2">
+                                <a href="https://www.speedtest.net/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Open Speedtest.net</a>
+                            </div>
+
+                            <div class="mt-2 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                <p class="text-sm text-yellow-700">
+                                    <span class="font-bold">💡 How to test your internet speed:</span><br>
+                                    Visit <a href="https://www.speedtest.net/" target="_blank" rel="noopener noreferrer" class="underline">speedtest.net</a> by Ookla.<br>
+                                    Run the speed test.<br>
+                                    Take a <strong>full-screen screenshot</strong> including the taskbar.<br>
+                                    Upload the screenshot below.
+                                </p>
+                                <div class="mt-3">
+                                    <video controls class="w-full rounded-md border border-yellow-200">
+                                        <source src="Internet Speed.mp4" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+
+                            <label for="speedtestUpload" class="block text-gray-700 font-medium mb-2">Upload Speedtest Result</label>
+                            <input
+                                type="file"
+                                id="speedtestUpload"
+                                name="speedtestUpload"
+                                accept="image/*"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                required
+                            />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Connection Type</label>
+                            <div class="mt-2">
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" name="connectionType" value="wifi" class="form-radio text-primary">
+                                    <span class="ml-2">Wi-Fi only</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="connectionType" value="wired" class="form-radio text-primary">
+                                    <span class="ml-2">Wired (LAN/Ethernet)</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Do you have backup internet?</label>
+                            <div class="mt-2">
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" name="backupInternet" value="yes" class="form-radio text-primary">
+                                    <span class="ml-2">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="backupInternet" value="no" class="form-radio text-primary">
+                                    <span class="ml-2">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="backupInternetDescription" class="mb-4 hidden">
+                            <label for="internetBackupDescription" class="block text-gray-700 font-medium mb-2">Please describe your backup internet</label>
+                            <input type="text" id="internetBackupDescription" name="internetBackupDescription" placeholder="e.g., pocket Wi-Fi, prepaid router, mobile hotspot" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Do you have a backup location?</label>
+                            <div class="mt-2">
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" name="backupLocation" value="yes" class="form-radio text-primary">
+                                    <span class="ml-2">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="backupLocation" value="no" class="form-radio text-primary">
+                                    <span class="ml-2">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="backupLocationDescription" class="mb-6 hidden">
+                            <label for="locationBackupDescription" class="block text-gray-700 font-medium mb-2">Please specify where</label>
+                            <input type="text" id="locationBackupDescription" name="locationBackupDescription" placeholder="e.g., family house, coworking space, café with reliable connection" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button type="button" class="prev-step bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                </svg>
+                                Back
+                            </button>
+                            <button type="button" class="next-step bg-primary text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center">
+                                Continue to Summary
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Summary -->
+                    <div id="summary-form" class="step-form hidden">
+                        <h2 class="text-2xl font-semibold mb-2">Summary Review</h2>
+                        <p class="text-gray-600 mb-6">Please review all details before submission.</p>
+                        
+                        <div class="mb-6">
+                            <div class="bg-gray-50 p-4 rounded-md mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-semibold">Personal Information</h3>
+                                    <button type="button" class="edit-section text-primary hover:underline" data-step="1">Edit</button>
+                                </div>
+                                <div id="personal-info-summary" class="text-gray-700"></div>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-md mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-semibold">Hardware Details</h3>
+                                    <button type="button" class="edit-section text-primary hover:underline" data-step="2">Edit</button>
+                                </div>
+                                <div id="hardware-summary" class="text-gray-700"></div>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-md mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-semibold">Internet Details</h3>
+                                    <button type="button" class="edit-section text-primary hover:underline" data-step="3">Edit</button>
+                                </div>
+                                <div id="internet-summary" class="text-gray-700"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button type="button" class="prev-step bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                </svg>
+                                Back
+                            </button>
+                            <button type="button" id="submit-assessment" class="bg-primary text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                                Submit Assessment
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Success Message (Hidden by default) -->
+                    <div id="success-message" class="hidden text-center py-8">
+                        <div class="text-green-500 text-5xl mb-4">✅</div>
+                        <h2 class="text-2xl font-semibold mb-2">Thank you for completing your IT Assessment!</h2>
+                        <p class="text-gray-600 mb-4">Your responses have been successfully recorded. Our IT Team will review your submission soon.</p>
+                        <p class="text-gray-700">Please be advised that, upon successful completion of all interviews, you will be required to present your backup device and internet connection during IT onboarding. Kindly ensure that you are using a wired (LAN) connection.</p>
+                    </div>
+                    
+                    <!-- Success Modal Pop-out -->
+                    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg shadow-xl w-full max-w-xl p-6 text-center">
+                            <div class="text-green-500 text-5xl mb-4">✅</div>
+                            <h2 class="text-2xl font-semibold mb-2">Thank you for completing your IT Assessment!</h2>
+                            <p class="text-gray-600 mb-4">Your responses have been successfully recorded. Our IT Team will review your submission soon.</p>
+                            <p class="text-gray-700">Please be advised that upon successful completion of all interviews, you will be required to present your backup device and internet connection during IT onboarding. Kindly ensure that you are using a wired (LAN) connection.</p>
+                            <div class="mt-6">
+                                <button id="close-success-modal" class="bg-primary text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t mt-auto">
+            <div class="container mx-auto px-4 py-4 text-center text-gray-600">
+                <p>IT Assessment Portal Ver. 1.0</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
