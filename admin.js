@@ -1,26 +1,75 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+// admin.js
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const SUPABASE_URL = "https://tvhunlkpuekapgkkgtkf.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aHVubGtwdWVrYXBna2tndGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NjU5NTcsImV4cCI6MjA3NjU0MTk1N30.cYBUGbWPosqKl7ecg2MwDOxsRSh3JGbo_7cCJ1ErRAQ";
+// 🔧 Initialize Supabase
+const SUPABASE_URL = "https://<YOUR-PROJECT-REF>.supabase.co"; // replace with your Supabase URL
+const SUPABASE_KEY = "<YOUR-ANON-KEY>"; // replace with your anon key
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
+// DOM elements
+const tableBody = document.getElementById("assessmentTable");
+const logoutBtn = document.getElementById("logoutBtn");
+const totalEl = document.getElementById("total");
+const monthEl = document.getElementById("month");
+const passedEl = document.getElementById("passed");
+const failedEl = document.getElementById("failed");
 
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const errorMessage = document.getElementById('error-message');
+// 🧠 Get current logged-in user (for showing email beside logout)
+const user = JSON.parse(localStorage.getItem("user"));
+if (user && user.email) {
+  const emailTag = document.createElement("span");
+  emailTag.textContent = user.email;
+  emailTag.style.fontSize = "14px";
+  emailTag.style.marginTop = "4px";
+  emailTag.style.color = "#374151";
+  logoutBtn.parentNode.insertBefore(emailTag, logoutBtn);
+}
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
+// 🚪 Logout handler
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
+});
+
+// 📊 Fetch assessments data
+async function fetchAssessments() {
+  const { data, error } = await supabase
+    .from("assessments")
+    .select("id, name, email, date, os, isp, status, summary, approver, updated_at")
+    .order("date", { ascending: false });
 
   if (error) {
-    console.error(error);
-    errorMessage.textContent = "Invalid login credentials. Please try again.";
-  } else {
-    console.log('Login successful:', data);
-    window.location.href = 'admin.html';
+    console.error("Error fetching data:", error);
+    return;
   }
-});
+
+  // 🧾 Populate table
+  tableBody.innerHTML = "";
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.id}</td>
+      <td>${row.name || "-"}</td>
+      <td>${row.email || "-"}</td>
+      <td>${row.date ? new Date(row.date).toLocaleDateString() : "-"}</td>
+      <td>${row.os || "-"}</td>
+      <td>${row.isp || "-"}</td>
+      <td>${row.status || "-"}</td>
+      <td>${row.summary || "-"}</td>
+      <td>${row.approver || "-"}</td>
+      <td>${row.updated_at ? new Date(row.updated_at).toLocaleString() : "-"}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+
+  // 🧮 Update summary cards
+  totalEl.textContent = data.length;
+  monthEl.textContent = data.filter(d => new Date(d.date).getMonth() === new Date().getMonth()).length;
+  passedEl.textContent = data.filter(d => d.status?.toLowerCase() === "all good").length;
+  failedEl.textContent = data.filter(d => d.status?.toLowerCase() === "failed").length;
+}
+
+// ⏱️ Auto-refresh data
+fetchAssessments();
+setInterval(fetchAssessments, 30000);
