@@ -1,113 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IT Assessment Admin</title>
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    body {
-      background-color: #f9fafb;
-      color: #111827;
-      font-family: system-ui, sans-serif;
-      padding: 20px;
-    }
+// admin.js
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 5px;
-    }
+// 🔧 Initialize Supabase
+const SUPABASE_URL = "https://tvhunlkpuekapgkkgtkf.supabase.co"; // replace with your Supabase URL
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aHVubGtwdWVrYXBna2tndGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NjU5NTcsImV4cCI6MjA3NjU0MTk1N30.cYBUGbWPosqKl7ecg2MwDOxsRSh3JGbo_7cCJ1ErRAQ"; // replace with your anon key
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    .dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin: 20px 0;
-    }
+// DOM elements
+const tableBody = document.getElementById("assessmentTable");
+const logoutBtn = document.getElementById("logoutBtn");
+const totalEl = document.getElementById("total");
+const monthEl = document.getElementById("month");
+const passedEl = document.getElementById("passed");
+const failedEl = document.getElementById("failed");
 
-    .card {
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    }
+// 🧠 Get current logged-in user (for showing email beside logout)
+const user = JSON.parse(localStorage.getItem("user"));
+if (user && user.email) {
+  const emailTag = document.createElement("span");
+  emailTag.textContent = user.email;
+  emailTag.style.fontSize = "14px";
+  emailTag.style.marginTop = "4px";
+  emailTag.style.color = "#374151";
+  logoutBtn.parentNode.insertBefore(emailTag, logoutBtn);
+}
 
-    .table-container {
-      margin-top: 20px;
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    }
+// 🚪 Logout handler
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
+});
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+// 📊 Fetch assessments data
+async function fetchAssessments() {
+  const { data, error } = await supabase
+    .from("assessments")
+    .select("id, name, email, date, os, isp, status, summary, approver, updated_at")
+    .order("date", { ascending: false });
 
-    th, td {
-      padding: 8px 12px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-    }
+  if (error) {
+    console.error("Error fetching data:", error);
+    return;
+  }
 
-    select {
-      padding: 4px 6px;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-    }
+  // 🧾 Populate table
+  tableBody.innerHTML = "";
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.id}</td>
+      <td>${row.name || "-"}</td>
+      <td>${row.email || "-"}</td>
+      <td>${row.date ? new Date(row.date).toLocaleDateString() : "-"}</td>
+      <td>${row.os || "-"}</td>
+      <td>${row.isp || "-"}</td>
+      <td>${row.status || "-"}</td>
+      <td>${row.summary || "-"}</td>
+      <td>${row.approver || "-"}</td>
+      <td>${row.updated_at ? new Date(row.updated_at).toLocaleString() : "-"}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
 
-    .export-btn {
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      cursor: pointer;
-      float: right;
-    }
+  // 🧮 Update summary cards
+  totalEl.textContent = data.length;
+  monthEl.textContent = data.filter(d => new Date(d.date).getMonth() === new Date().getMonth()).length;
+  passedEl.textContent = data.filter(d => d.status?.toLowerCase() === "all good").length;
+  failedEl.textContent = data.filter(d => d.status?.toLowerCase() === "failed").length;
+}
 
-    .export-btn:hover {
-      background-color: #1d4ed8;
-    }
-  </style>
-</head>
-<body>
-  <div style="display: flex; align-items: center; justify-content: space-between;">
-    <h1>IT Assessment Admin</h1>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <img src="Extenteam Logo.png" alt="Extenteam Logo" style="height: 80px; width: auto; object-fit: contain;" />
-      <button id="logoutBtn" class="bg-red-500 text-white p-2 rounded">Logout</button>
-    </div>
-  </div>
-  <p>Manage and review submitted assessments</p>
-
-  <div class="dashboard">
-    <div class="card"><b>Total Assessments</b><p id="total">0</p></div>
-    <div class="card"><b>This Month</b><p id="month">0</p></div>
-    <div class="card"><b>All Good</b><p id="passed">0</p></div>
-    <div class="card"><b>Failed</b><p id="failed">0</p></div>
-  </div>
-
-  <div class="table-container">
-    <button class="export-btn">Export CSV</button>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Date</th>
-          <th>OS</th>
-          <th>ISP</th>
-          <th>Status</th>
-          <th>Summary</th>
-        </tr>
-      </thead>
-      <tbody id="assessmentTable"></tbody>
-    </table>
-  </div>
-
-  <script type="module" src="admin.js"></script>
-</body>
-</html>
+// ⏱️ Auto-refresh data
+fetchAssessments();
+setInterval(fetchAssessments, 30000);
