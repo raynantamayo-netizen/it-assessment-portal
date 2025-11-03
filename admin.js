@@ -1,75 +1,81 @@
-// admin.js
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-// 🔧 Initialize Supabase
-const SUPABASE_URL = "https://<YOUR-PROJECT-REF>.supabase.co"; // replace with your Supabase URL
-const SUPABASE_KEY = "<YOUR-ANON-KEY>"; // replace with your anon key
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const SUPABASE_URL = "https://tvhunlkpuekapgkkgtkf.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aHVubGtwdWVrYXBna2tndGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NjU5NTcsImV4cCI6MjA3NjU0MTk1N30.cYBUGbWPosqKl7ecg2MwDOxsRSh3JGbo_7cCJ1ErRAQ";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// DOM elements
-const tableBody = document.getElementById("assessmentTable");
-const logoutBtn = document.getElementById("logoutBtn");
-const totalEl = document.getElementById("total");
-const monthEl = document.getElementById("month");
-const passedEl = document.getElementById("passed");
-const failedEl = document.getElementById("failed");
+console.log("Admin.js loaded");
 
-// 🧠 Get current logged-in user (for showing email beside logout)
-const user = JSON.parse(localStorage.getItem("user"));
-if (user && user.email) {
-  const emailTag = document.createElement("span");
-  emailTag.textContent = user.email;
-  emailTag.style.fontSize = "14px";
-  emailTag.style.marginTop = "4px";
-  emailTag.style.color = "#374151";
-  logoutBtn.parentNode.insertBefore(emailTag, logoutBtn);
-}
-
-// 🚪 Logout handler
-logoutBtn.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  localStorage.removeItem("user");
-  window.location.href = "login.html";
-});
-
-// 📊 Fetch assessments data
-async function fetchAssessments() {
+(async () => {
   const { data, error } = await supabase
     .from("assessments")
-    .select("id, name, email, date, os, isp, status, summary, approver, updated_at")
-    .order("date", { ascending: false });
+    .select("*");
 
   if (error) {
-    console.error("Error fetching data:", error);
+    console.error("Supabase fetch error:", error);
+  } else {
+    console.log("Fetched data from Supabase:", data);
+  }
+})();
+
+// Protect admin access
+(async () => {
+  const { data: user } = await supabase.auth.getUser();
+  if (!user.user) {
+    window.location.href = "login.html";
+  }
+})();
+
+// ✅ Logout button handler
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    window.location.href = "login.html";
+  });
+}
+
+// Fetch assessments
+async function loadAssessments() {
+  const { data, error } = await supabase
+    .from("assessments")
+    .select("*")
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Error loading data:", error);
     return;
   }
 
-  // 🧾 Populate table
+  const tableBody = document.querySelector("tbody");
   tableBody.innerHTML = "";
+
   data.forEach((row) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.id}</td>
-      <td>${row.name || "-"}</td>
-      <td>${row.email || "-"}</td>
-      <td>${row.date ? new Date(row.date).toLocaleDateString() : "-"}</td>
-      <td>${row.os || "-"}</td>
-      <td>${row.isp || "-"}</td>
-      <td>${row.status || "-"}</td>
-      <td>${row.summary || "-"}</td>
-      <td>${row.approver || "-"}</td>
-      <td>${row.updated_at ? new Date(row.updated_at).toLocaleString() : "-"}</td>
+      <td>${row.full_name}</td>
+      <td>${row.email}</td>
+      <td>${row.assessment_date || "-"}</td>
+      <td>${row.operating_system || "-"}</td>
+      <td>${row.internet_provider || "-"}</td>
+      <td>
+        <select class="status">
+          <option ${row.status === "Passed" ? "selected" : ""}>Passed</option>
+          <option ${row.status === "Failed" ? "selected" : ""}>Failed</option>
+        </select>
+      </td>
+      <td>
+        <select class="summary">
+          <option ${row.summary === "All good" ? "selected" : ""}>All good</option>
+          <option ${row.summary === "Okay to proceed, but please upgrade your internet" ? "selected" : ""}>Okay to proceed, but please upgrade your internet</option>
+          <option ${row.summary === "Computer specification is below minimum requirement" ? "selected" : ""}>Computer specification is below minimum requirement</option>
+          <option ${row.summary === "Internet speed is below minimum requirements" ? "selected" : ""}>Internet speed is below minimum requirements</option>
+          <option ${row.summary === "Computer and internet did not meet our minimum requirements" ? "selected" : ""}>Computer and internet did not meet our minimum requirements</option>
+        </select>
+      </td>
     `;
     tableBody.appendChild(tr);
   });
-
-  // 🧮 Update summary cards
-  totalEl.textContent = data.length;
-  monthEl.textContent = data.filter(d => new Date(d.date).getMonth() === new Date().getMonth()).length;
-  passedEl.textContent = data.filter(d => d.status?.toLowerCase() === "all good").length;
-  failedEl.textContent = data.filter(d => d.status?.toLowerCase() === "failed").length;
 }
 
-// ⏱️ Auto-refresh data
-fetchAssessments();
-setInterval(fetchAssessments, 30000);
+loadAssessments();
